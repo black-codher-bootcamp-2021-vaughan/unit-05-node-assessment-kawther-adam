@@ -83,15 +83,96 @@ app.post('/todos', (req, res) => {
 
 
 //Add PATCH request with path '/todos/:id
+app.patch('/todos/:id', (req, res) => {
+  const foundTodo = todos.find((todo)=> {return todo.id == req.params.id })
+if (!foundTodo){
+  return res.status(400).send("bad request")
+}
+
+  var fs = require("fs");
+  console.log( req.params.id );
+  const newTodos = todos.map( todo => {
+      if (todo.id == req.params.id ){
+        todo = { 
+         ...todo,
+          ...req.body} ;
+      }
+      return todo
+   } );
+
+
+  fs.writeFile( __dirname + todoFilePath , JSON.stringify(newTodos) , err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+});
+  res.status(200).json(newTodos);
+ });
 
 //Add POST request with path '/todos/:id/complete
+app.post('/todos/:id/complete', (req, res) => {
+  var fs = require("fs");
+  console.log( req.params.id );
+
+  const todoComplete = todos.map( todo => {
+      if (todo.id == req.params.id ){
+        todo.completed = true;
+      }
+    return todo;
+   } );
+  if (!todos) return res.sendStatus(400);
+  fs.writeFile( dirname + todoFilePath , JSON.stringify(todos) , err => {
+    if ("bad request") {
+      console.error(err)
+      return
+    }
+});
+
+  res.json(todoComplete);})
+
 
 //Add POST request with path '/todos/:id/undo
 
-//Add DELETE request with path '/todos/:id
-
-app.listen(port, function () {
-    console.log(`Node server is running... http://localhost:${port}`);
+app.post('/todos/:id/undo', (req, res) => {
+  var fs = require("fs");
+  console.log( req.params.id );
+  const todo = todos.map( todo => {
+      if (todo.id == req.params.id ){
+        todo.completed = false;
+      }
+         return todos;
+   } );
+  if (!todo) return res.sendStatus(400);
+  fs.writeFile( dirname + todoFilePath , JSON.stringify(todo) , err => {
+    if (err) {
+      console.error(err)
+      return
+    }
 });
+  res.json(todo);
+
+ });
+
+//Add DELETE request with path '/todos/:id
+app.delete('/todos/:id', (req, res) => {
+  var fs = require("fs");
+  console.log( req.params.id );
+  const todo = todos.filter( todo => {
+      if ( todo.id == req.params.id ){
+        return false;
+      }
+
+   } );
+  if (!todo) return res.sendStatus(400);
+  fs.writeFile( __dirname + todoFilePath , JSON.stringify(todo) , err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+});
+  res.json(todo);
+
+ });
 
 module.exports = app;
